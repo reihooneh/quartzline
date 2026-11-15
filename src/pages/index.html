@@ -1,0 +1,53 @@
+<!--{"title":"Quartzline · Fire it fast, keep it whole","description":"Quartzline simulates the heat and stress inside a pot through a whole kiln firing, shows where and when it would crack, and plans the fastest kiln schedule that keeps it whole.","nav":"index","script":"home.js"}-->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-text">
+          <p class="eyebrow">Ceramics · heat · stress</p>
+          <h1>Fire it fast.<br>Keep it whole.</h1>
+          <p class="lede">A big platter that comes out of the kiln in two pieces usually cracked while it cooled through 573 °C. That's where the quartz in the clay suddenly shrinks, and the rim got there before the middle did. Quartzline follows a firing inside the clay, minute by minute. It shows where and when a piece would crack, then finds the fastest kiln schedule that keeps it whole.</p>
+          <div class="cta">
+            <a class="button primary" href="studio.html">Plan a firing</a>
+            <a class="button ghost-dark" href="wall.html">See inside the wall</a>
+          </div>
+        </div>
+        <figure class="hero-figure">
+          <div class="stage hero-stage" id="hero-stage"></div>
+          <figcaption id="hero-caption">A 36 cm stoneware platter cooling in an electric kiln, coloured by stress. Amber is where the clay is being pulled apart.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="wrap band">
+      <h2 class="section-title">One platter, two schedules</h2>
+      <div class="tiles wide" id="compare">
+        <div class="tile"><div class="k">The usual fast-glaze schedule</div><div class="v" id="usual-chance">…</div><div class="d" id="usual-detail">chance of a crack</div></div>
+        <div class="tile"><div class="k">Quartzline's schedule</div><div class="v" id="plan-chance">…</div><div class="d" id="plan-detail">working it out in your browser</div></div>
+      </div>
+    </section>
+
+    <section class="wrap band">
+      <h2 class="section-title">What it does</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Follows the heat into the clay</h3>
+          <p>The pot is cut into rings a few millimetres apart, and each wall into six layers. Heat reaches the faces from the kiln by radiation and convection, reaches the base from a shelf that lags behind, and flows through the clay. The inside of a narrow bottle sees less of the kiln than the outside does.</p>
+        </article>
+        <article class="card">
+          <h3>Turns uneven heat into stress</h3>
+          <p>Hot clay wants to be bigger. Where it's held back by cooler clay nearby, the wall is pulled or squeezed. Quartz and cristobalite make it worse: they change size suddenly at 573 °C and around 226 °C. A Weibull model turns the pull on every bit of wall into a chance of cracking.</p>
+        </article>
+        <article class="card">
+          <h3>Plans the fastest safe firing</h3>
+          <p>It starts with everything flat out. It finds the riskiest moment and slows down whatever caused it: heating through quartz, cooling through it, or opening the lid too soon. Then it speeds everything else back up. You get a schedule your kiln controller can run.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap band">
+      <h2 class="section-title">How a dunt happens</h2>
+      <ol class="steps">
+        <li><span class="n">1</span><div><h3>The rim cools first</h3><p>Thin and open to the kiln on both faces, the rim loses heat faster than the thick base, which sits on a shelf that is still warm.</p></div></li>
+        <li><span class="n">2</span><div><h3>Quartz shrinks at 573 °C</h3><p>As the rim passes 573 °C its quartz grains shrink at once. The middle, still hotter, hasn't yet.</p></div></li>
+        <li><span class="n">3</span><div><h3>The rim is pulled apart</h3><p>The shrinking rim is held at its old size by the hotter clay inside it, so it's stretched round its circumference. If the pull beats the clay's strength, a crack runs in from the edge.</p></div></li>
+      </ol>
+    </section>
