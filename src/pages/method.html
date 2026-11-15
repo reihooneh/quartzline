@@ -1,0 +1,78 @@
+<!--{"title":"How it works · Quartzline","description":"The models behind Quartzline: heat flow through a turned pot, thermal stress in shells and plates, quartz and cristobalite, Weibull strength and the schedule planner, with checks against exact solutions run live in your browser.","nav":"method","script":"method.js"}-->
+    <section class="wrap page-head">
+      <p class="eyebrow">Method</p>
+      <h1>How it works</h1>
+      <p class="lede">Quartzline is a small physics engine written in TypeScript. It runs here in your browser, in a background worker. These are its models, what they leave out, and how they're checked.</p>
+    </section>
+
+    <div class="wrap prose-grid">
+      <article class="prose panel">
+        <h2>1. The pot</h2>
+        <p>A thrown pot is the same all the way round, so one profile describes it. Quartzline follows the middle of the wall from the centre of the base, out and up to the rim, cutting it into up to 60 rings a few millimetres apart. Each ring knows its radius, height, wall thickness and which way its outside faces. The wall is then cut into six layers from the outside face to the inside.</p>
+
+        <h2>2. Heat</h2>
+        <p>Each minute of the firing has two parts:</p>
+        <ul>
+          <li>a kiln controller follows the schedule, limited by how fast the kiln can heat and how fast it cools on its own;</li>
+          <li>heat flows into and through the clay.</li>
+        </ul>
+        <p>How heat reaches each face:</p>
+        <ul>
+          <li>The outside face exchanges heat with the kiln by radiation (which dominates when hot) and convection.</li>
+          <li>The inside face does the same, but only as much as it can see out of the pot's opening.</li>
+          <li>The base touches a shelf, a heavy slab that lags behind the air.</li>
+          <li>Opening the lid lets room air in, while the kiln's walls stay hot.</li>
+        </ul>
+        <p>Each time step is solved in two halves: across the wall, then along the pot. Both are <em>implicit</em> (backward Euler), which means one small tridiagonal solve per ring or layer. That makes them stable for any step, and they conserve heat exactly.</p>
+
+        <h2>3. Stress</h2>
+        <p>Clay that is hotter wants to be bigger. Quartzline adds two effects:</p>
+        <ul>
+          <li><strong>Across the wall</strong>, a free plate can bend and stretch freely, so only the part of the temperature profile that isn't a straight line causes stress. This is the textbook free-plate result.</li>
+          <li><strong>Along the pot</strong>, each ring is held by its neighbours. For a flat disc the exact hoop stress is E·(½·the whole disc's average + ½·the average inside this radius − this ring's own strain). In a curved shell the neighbours' grip fades over about 2.4·√(R·h), where R is the radius of curvature and h the thickness. Quartzline uses the disc formula with each average weighted to the neighbours within that reach.</li>
+        </ul>
+        <p>Quartz and cristobalite are added to the expansion curve as sudden steps, at 573 °C and around 226 °C.</p>
+
+        <h2>4. Will it crack?</h2>
+        <p>Ceramics break at their worst flaw, and bigger pieces have more flaws. The Weibull model captures both: the chance of surviving a moment is exp(−Σ (V/V₀)·(σ/σ₀)<sup>m</sup>), summed over every bit of wall in tension. Quartzline reports the worst moment of the firing, where it was, and what caused it.</p>
+
+        <h2>5. Planning</h2>
+        <p>A schedule is made of eight choices, each with a ladder of settings from cautious to fast:</p>
+        <ul>
+          <li>three heating rates (below, through and above the quartz inversion);</li>
+          <li>four cooling rates;</li>
+          <li>when to open the lid.</li>
+        </ul>
+        <p>The planner starts with everything at its fastest. While the chance of a crack is over your limit, it finds the riskiest moment, works out which choice was in charge then (from the temperature range the pot itself was passing through), and makes that choice a notch more cautious. It then tries speeding each choice back up, keeping any change that saves time and stays safe. In the tests, on two choices at a time, it matches trying every combination.</p>
+
+        <h2>6. What it leaves out</h2>
+        <p>Quartzline is a model for comparing schedules, not a measurement of your clay. Its limits:</p>
+        <ul>
+          <li><strong>Typical figures, not yours:</strong> the clay bodies and kilns use typical published values.</li>
+          <li><strong>Assumed ready to fire:</strong> the ware is taken as already bisqued and bone dry, so drying, steam and burnout aren't modelled.</li>
+          <li><strong>Things not modelled:</strong> glaze fit (crazing and shivering), elements on one side of the kiln, and draughts through spyholes.</li>
+          <li><strong>Simplified stress:</strong> the along-the-pot stress is an engineering simplification. It is exact for a flat disc, and a guide for other shapes.</li>
+          <li><strong>Lid opening capped:</strong> the planner never suggests opening the lid above 250 °C.</li>
+        </ul>
+        <p>Test a new schedule on pieces you can spare.</p>
+      </article>
+
+      <aside class="panel checks" aria-labelledby="checks-h">
+        <h2 id="checks-h">Checked live, in your browser</h2>
+        <p class="hint">These ran just now in this page against exact answers. The full test suite runs on every change on GitHub.</p>
+        <table class="data" id="checks">
+          <caption class="sr">Model results against exact answers</caption>
+          <thead><tr><th scope="col">Check</th><th scope="col">Quartzline</th><th scope="col">Exact</th></tr></thead>
+          <tbody><tr><td colspan="3">Running…</td></tr></tbody>
+        </table>
+        <h2>Sources</h2>
+        <ul class="sources">
+          <li>J. Crank, <em>The Mathematics of Diffusion</em>: heat conduction in a slab (the same equation).</li>
+          <li>S. Timoshenko and J. N. Goodier, <em>Theory of Elasticity</em>: thermal stress in plates and discs.</li>
+          <li>S. Timoshenko and S. Woinowsky-Krieger, <em>Theory of Plates and Shells</em>: how far edge effects reach in a shell.</li>
+          <li>W. Weibull (1951), "A statistical distribution function of wide applicability".</li>
+          <li>Digitalfire's articles on dunting, quartz and cristobalite inversions.</li>
+          <li>Orton cone charts for the temperatures at the end of a firing.</li>
+        </ul>
+      </aside>
+    </div>
