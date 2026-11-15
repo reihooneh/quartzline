@@ -1,0 +1,119 @@
+<!--{"title":"Plan a firing · Quartzline","description":"Describe a piece, its clay and your kiln schedule: see the heat and stress inside it through the whole firing, where and when it would crack, and the fastest schedule that keeps it whole.","nav":"studio","script":"studio.js"}-->
+    <section class="wrap page-head">
+      <p class="eyebrow">Studio</p>
+      <h1>Plan a firing</h1>
+      <p class="lede">Describe the piece and your kiln schedule. Quartzline follows the heat into the clay minute by minute, works out the stress in every part of the wall, and finds the fastest schedule that keeps the chance of a crack under your limit.</p>
+    </section>
+
+    <div class="wrap studio">
+      <form class="controls" id="controls" aria-label="The firing" novalidate>
+        <fieldset class="panel">
+          <legend>The piece</legend>
+          <div class="seg" id="form" role="group" aria-label="Form"></div>
+          <div class="sliders">
+            <div class="slider"><label for="diameter">Diameter</label><output id="diameter-out" for="diameter"></output><input id="diameter" type="range" min="4" max="60" step="1"></div>
+            <div class="slider"><label for="height">Height</label><output id="height-out" for="height"></output><input id="height" type="range" min="1" max="60" step="0.5"></div>
+            <div class="slider"><label for="wall">Wall</label><output id="wall-out" for="wall"></output><input id="wall" type="range" min="3" max="30" step="0.5"></div>
+            <div class="slider"><label for="base">Base</label><output id="base-out" for="base"></output><input id="base" type="range" min="3" max="40" step="0.5"></div>
+          </div>
+          <label class="check"><input id="foot" type="checkbox"> <span>Stands on a foot ring</span></label>
+        </fieldset>
+
+        <fieldset class="panel">
+          <legend>Clay and kiln</legend>
+          <label class="field" for="clay"><span>Clay</span><select id="clay"></select></label>
+          <p class="hint" id="clay-about"></p>
+          <label class="field" for="kiln"><span>Kiln</span><select id="kiln"></select></label>
+          <label class="field" for="cone"><span>Firing to</span><select id="cone"></select></label>
+        </fieldset>
+
+        <fieldset class="panel">
+          <legend>Your schedule</legend>
+          <table class="segments" id="segments">
+            <caption class="sr">Your kiln controller's segments</caption>
+            <thead><tr><th scope="col">Rate °C/h</th><th scope="col">To °C</th><th scope="col">Hold min</th><th scope="col"><span class="sr">Remove</span></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <button type="button" class="ghost" id="add-seg">Add a segment</button>
+          <label class="field" for="open"><span>Open the lid at</span><select id="open"></select></label>
+          <p class="hint">After the last segment the kiln is switched off and cools on its own until you open it.</p>
+        </fieldset>
+
+        <fieldset class="panel">
+          <legend>Planning</legend>
+          <label class="field" for="limit"><span>Accept a crack chance up to</span><select id="limit"></select></label>
+          <button type="button" class="primary" id="plan">Find the fastest safe schedule</button>
+          <p class="status" id="plan-status" role="status" aria-live="polite"></p>
+          <div class="file-row">
+            <button type="button" class="ghost" id="save">Save setup</button>
+            <button type="button" class="ghost" id="load">Load setup</button>
+            <input id="file" type="file" accept=".json,application/json" hidden>
+          </div>
+          <p class="error" id="error" role="alert" hidden></p>
+        </fieldset>
+      </form>
+
+      <div class="results">
+        <section class="panel verdict" aria-labelledby="verdict-h">
+          <h2 id="verdict-h">The verdict</h2>
+          <p class="headline" id="headline">Working out the firing…</p>
+          <div class="tiles" id="tiles"></div>
+        </section>
+
+        <section class="panel viewer" aria-labelledby="viewer-h">
+          <div class="viewer-head">
+            <h2 id="viewer-h">Inside the piece</h2>
+            <div class="toolbar">
+              <div class="seg small" id="which" role="group" aria-label="Which firing">
+                <button type="button" data-value="mine">Your schedule</button>
+                <button type="button" data-value="plan" disabled>The plan</button>
+              </div>
+              <div class="seg small" id="mode" role="group" aria-label="Colour by">
+                <button type="button" data-value="stress">Stress</button>
+                <button type="button" data-value="heat">Temperature</button>
+              </div>
+            </div>
+          </div>
+          <div class="stage" id="stage"></div>
+          <div class="legend" id="legend"></div>
+          <div class="time">
+            <button type="button" class="ghost" id="play">Play the firing</button>
+            <label class="sr" for="time">Time in the firing</label>
+            <input id="time" type="range" min="0" max="0" step="1" value="0">
+            <output id="clock" for="time"></output>
+          </div>
+          <p class="now" id="now"></p>
+        </section>
+
+        <section class="panel" aria-labelledby="chart-h">
+          <h2 id="chart-h">The firing, hour by hour</h2>
+          <div id="chart" class="chart-box"></div>
+          <ul class="key">
+            <li><i class="sw sw-air"></i>Kiln air</li>
+            <li><i class="sw sw-spread"></i>Coldest to hottest part of the piece</li>
+            <li><i class="sw sw-risk"></i>Chance of a crack so far</li>
+          </ul>
+        </section>
+
+        <section class="panel" aria-labelledby="worst-h">
+          <h2 id="worst-h">The riskiest moment</h2>
+          <p id="worst"></p>
+        </section>
+
+        <section class="panel" id="plan-panel" aria-labelledby="plan-h" hidden>
+          <h2 id="plan-h">Quartzline's schedule</h2>
+          <p id="plan-summary"></p>
+          <table class="data" id="plan-table">
+            <caption class="sr">The planned controller segments</caption>
+            <thead><tr><th scope="col">Segment</th><th scope="col">Rate</th><th scope="col">To</th><th scope="col">Hold</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <p id="plan-open"></p>
+          <button type="button" class="ghost" id="download">Download for your controller</button>
+          <details>
+            <summary>How the planner got there</summary>
+            <ol id="plan-steps"></ol>
+          </details>
+        </section>
+      </div>
+    </div>
