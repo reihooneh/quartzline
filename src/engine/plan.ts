@@ -114,6 +114,7 @@ export interface PlanResult {
   evaluations: number;
   safe: boolean;      // met the limit
   steps: string[];    // what the planner did, in words
+  stopped: boolean;   // hit the evaluation or time limit before it had finished
 }
 
 export interface PlanOptions {
@@ -124,6 +125,7 @@ export interface PlanOptions {
   maxEvaluations?: number;
   fire?: FireOptions;
   onProgress?: (evaluations: number, chance: number) => void;
+  timeLimit?: number;          // ms: stop searching after this long and return the best so far
 }
 
 // Which choice was in charge when the worst moment happened. The pot lags behind the kiln, so
@@ -154,6 +156,9 @@ const NEIGHBOURS: Record<Choice, Choice[]> = {
 export function plan(shape: Shape, clay: Clay, kiln: Kiln, peak: number, opts: PlanOptions): PlanResult {
   const free = new Set(opts.choices ?? CHOICES);
   const maxEval = opts.maxEvaluations ?? 160;
+  const deadline = opts.timeLimit !== undefined ? Date.now() + opts.timeLimit : Infinity;
+  const outOfBudget = () => evaluations >= maxEval || Date.now() >= deadline;
+  let stopped = false;
   const cache = new Map<string, Firing>();
   let evaluations = 0;
   const run = (p: Plan): Firing => {
@@ -173,7 +178,7 @@ export function plan(shape: Shape, clay: Clay, kiln: Kiln, peak: number, opts: P
   let f = run(cur);
 
   // 1. Slow down whatever is to blame until safe.
-  while (!ok(f) && evaluations < maxEval) {
+  while (!ok(f) && !(stopped = outOfBudget())) {
     const b = build(cur, peak, opts.hold);
     const culprit = blame(f, b);
     const order = [culprit, ...NEIGHBOURS[culprit], ...CHOICES];
@@ -188,7 +193,7 @@ export function plan(shape: Shape, clay: Clay, kiln: Kiln, peak: number, opts: P
   // 2. Speed back up wherever it stays safe.
   if (safe) {
     let improved = true;
-    while (improved && evaluations < maxEval) {
+    while (improved && !(stopped = outOfBudget())) {
       improved = false;
       for (const c of CHOICES) {
         if (!free.has(c) || cur[c] >= ladder(c).length - 1) continue;
@@ -200,9 +205,9 @@ export function plan(shape: Shape, clay: Clay, kiln: Kiln, peak: number, opts: P
           improved = true;
           steps.push(`faster: ${LABELS[c]}`);
         }
-        if (evaluations >= maxEval) break;
+        if (outOfBudget()) { stopped = true; break; }
       }
     }
   }
-  return { plan: cur, built: build(cur, peak, opts.hold), firing: f, evaluations, safe, steps };
+  return { plan: cur, built: build(cur, peak, opts.hold), firing: f, evaluations, safe, steps, stopped };
 }

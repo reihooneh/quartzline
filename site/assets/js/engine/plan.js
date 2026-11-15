@@ -121,6 +121,9 @@ const NEIGHBOURS = {
 export function plan(shape, clay, kiln, peak, opts) {
     const free = new Set(opts.choices ?? CHOICES);
     const maxEval = opts.maxEvaluations ?? 160;
+    const deadline = opts.timeLimit !== undefined ? Date.now() + opts.timeLimit : Infinity;
+    const outOfBudget = () => evaluations >= maxEval || Date.now() >= deadline;
+    let stopped = false;
     const cache = new Map();
     let evaluations = 0;
     const run = (p) => {
@@ -140,7 +143,7 @@ export function plan(shape, clay, kiln, peak, opts) {
     let cur = { ...(opts.start ?? fastest()) };
     let f = run(cur);
     // 1. Slow down whatever is to blame until safe.
-    while (!ok(f) && evaluations < maxEval) {
+    while (!ok(f) && !(stopped = outOfBudget())) {
         const b = build(cur, peak, opts.hold);
         const culprit = blame(f, b);
         const order = [culprit, ...NEIGHBOURS[culprit], ...CHOICES];
@@ -155,7 +158,7 @@ export function plan(shape, clay, kiln, peak, opts) {
     // 2. Speed back up wherever it stays safe.
     if (safe) {
         let improved = true;
-        while (improved && evaluations < maxEval) {
+        while (improved && !(stopped = outOfBudget())) {
             improved = false;
             for (const c of CHOICES) {
                 if (!free.has(c) || cur[c] >= ladder(c).length - 1)
@@ -168,10 +171,12 @@ export function plan(shape, clay, kiln, peak, opts) {
                     improved = true;
                     steps.push(`faster: ${LABELS[c]}`);
                 }
-                if (evaluations >= maxEval)
+                if (outOfBudget()) {
+                    stopped = true;
                     break;
+                }
             }
         }
     }
-    return { plan: cur, built: build(cur, peak, opts.hold), firing: f, evaluations, safe, steps };
+    return { plan: cur, built: build(cur, peak, opts.hold), firing: f, evaluations, safe, steps, stopped };
 }

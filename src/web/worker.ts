@@ -22,6 +22,7 @@ export interface Planned {
   steps: string[];
   safe: boolean;
   evaluations: number;
+  stopped: boolean;
 }
 
 function view(sh: Shape): ShapeView {
@@ -51,6 +52,7 @@ scope.onmessage = (e: MessageEvent) => {
       let last = 0;
       const r = plan(shape, setup.clay, setup.kiln, setup.cone.peak, {
         limit: setup.limit,
+        timeLimit: 12000, // the biggest piece in the slowest kiln would otherwise take half a minute
         hold: Math.max(0, ...setup.schedule.filter((s) => Math.abs(s.target - setup.cone.peak) < 31).map((s) => s.hold)),
         onProgress: (n) => {
           const now = Date.now();
@@ -61,7 +63,7 @@ scope.onmessage = (e: MessageEvent) => {
       const segments = compact(r.built.schedule);
       planned = {
         schedule: segments, openAt: r.built.openAt, text: scheduleText(segments), firing: again,
-        steps: r.steps, safe: r.safe, evaluations: r.evaluations,
+        steps: r.steps, safe: r.safe, evaluations: r.evaluations, stopped: r.stopped,
       };
     }
     scope.postMessage({ id: d.id, kind: 'done', shape: view(shape), layers: mine.layers, mine, planned, labels: LABELS });

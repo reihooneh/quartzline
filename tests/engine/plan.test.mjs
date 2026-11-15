@@ -143,8 +143,8 @@ test('the largest piece in the slowest kiln still plans in bounded time', () => 
   const huge = { form: 'bottle', diameter: 0.6, height: 0.6, wall: 0.03, base: 0.04, foot: false };
   const clay = clayById('silica-rich');
   const t0 = Date.now();
-  const r = plan(shapeOf(huge, clay.density), clay, kilnById('gas'), 1285, { limit: 0.001, hold: 600, maxEvaluations: 40 });
-  assert.ok(r.evaluations <= 40);
+  const r = plan(shapeOf(huge, clay.density), clay, kilnById('gas'), 1285, { limit: 0.001, hold: 600, timeLimit: 8000 });
+  assert.ok(r.stopped || r.safe);
   assert.ok(r.firing.duration < 96 * 3600 + 60);
-  assert.ok(Date.now() - t0 < 120000);
+  assert.ok(Date.now() - t0 < 8000 + 5000, 'stops near its time limit');
 });

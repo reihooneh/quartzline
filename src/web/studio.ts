@@ -195,7 +195,7 @@ async function run(plan: boolean): Promise<void> {
     if (!plan) state.which = 'mine';
     else state.which = res.planned ? 'plan' : 'mine';
     if (plan && res.planned) {
-      $('plan-status').textContent = `Compared ${res.planned.evaluations} firings.`;
+      $('plan-status').textContent = `Compared ${res.planned.evaluations} firings${res.planned.stopped ? ' (a slow piece to simulate: the search stopped at its time limit, so this is the best found)' : ''}.`;
     } else if (!plan) {
       $('plan-status').textContent = '';
     }
