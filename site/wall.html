@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Inside the wall · Quartzline</title>
+  <meta name="description" content="An interactive explainer: cool a plate through the quartz inversion and watch the rim pull away from the middle, ring by ring.">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script type="module" src="assets/js/web/wallpage.js"></script>
+</head>
+<body class="page-wall">
+  <a class="skip" href="#main">Skip to the content</a>
+  <header class="top">
+    <div class="top-inner">
+      <a class="mark" href="index.html" aria-label="Quartzline home">
+        <svg class="mark-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 6h14l-1 3c4 3 5 8 4 12-1 5-5 8-10 8s-9-3-10-8c-1-4 0-9 4-12z"/><path d="M5 19c4 1.5 8 1.5 11 0s7-1.5 11 0"/></svg>
+        <span>Quartzline</span>
+      </a>
+      <nav class="nav" aria-label="Pages">
+        <a href="index.html">Home</a>
+        <a href="studio.html">Plan a firing</a>
+        <a href="wall.html" aria-current="page">Inside the wall</a>
+        <a href="method.html">How it works</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="wrap page-head">
+      <p class="eyebrow">Explainer</p>
+      <h1>Inside the wall</h1>
+      <p class="lede">Take a plate at 700 °C and cool it through 573 °C. The rim is thin and open to the kiln on both faces, while the middle sits on a shelf that is still warm, so the rim cools first. When the rim's quartz shrinks, the warmer middle holds it at its old size and the rim is stretched round its edge. Change the plate, the clay and the cooling rate, and watch the pull.</p>
+    </section>
+
+    <div class="wrap explainer">
+      <form class="panel controls-inline" id="wall-controls" aria-label="The plate" novalidate>
+        <label class="field" for="w-clay"><span>Clay</span><select id="w-clay"></select></label>
+        <div class="slider"><label for="w-diam">Diameter</label><output id="w-diam-out" for="w-diam"></output><input id="w-diam" type="range" min="15" max="50" step="1" value="36"></div>
+        <div class="slider"><label for="w-thick">Thickness</label><output id="w-thick-out" for="w-thick"></output><input id="w-thick" type="range" min="5" max="16" step="1" value="9"></div>
+        <div class="slider"><label for="w-rate">Cooling rate</label><output id="w-rate-out" for="w-rate"></output><input id="w-rate" type="range" min="25" max="250" step="25" value="250"></div>
+      </form>
+
+      <section class="panel" aria-labelledby="slice-h">
+        <h2 id="slice-h">From the middle of the plate to its rim</h2>
+        <div id="slice" class="chart-box"></div>
+        <div class="time">
+          <button type="button" class="ghost" id="w-play">Play</button>
+          <label class="sr" for="w-time">Time</label>
+          <input id="w-time" type="range" min="0" max="0" step="1" value="0">
+          <output id="w-clock" for="w-time"></output>
+        </div>
+        <p class="now" id="w-now"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="peak-h">
+        <h2 id="peak-h">The worst of it</h2>
+        <div class="tiles" id="w-tiles"></div>
+        <p class="hint">Slower cooling gives the middle time to keep up with the rim, so they pass 573 °C closer together. A wider plate, a heavier shelf or a stiffer clay all make it worse. The <a href="studio.html">studio</a> does this for a whole firing and any shape.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="curve-h">
+        <h2 id="curve-h">Why 573 °C matters: how the clay grows with heat</h2>
+        <div id="curve" class="chart-box"></div>
+        <p class="hint">Most of the time clay grows steadily as it heats. Free quartz jumps in size at 573 °C, and cristobalite does at around 226 °C. Pass through either unevenly, with part of the pot above and part below, and the two parts no longer fit each other.</p>
+      </section>
+    </div>
+  </main>
+  <footer class="foot">
+    <div class="foot-inner">
+      <p>Quartzline is open source (MIT). It runs entirely in your browser: no sign-in, no tracking, and setups you load never leave your device. Its clay and kiln figures are typical values for comparing schedules, not measurements of your clay or your kiln: test a new schedule on pieces you can spare, and follow your kiln maker's safety instructions.</p>
+      <p><a href="https://github.com/reihooneh/quartzline">Source code and tests on GitHub</a></p>
+    </div>
+  </footer>
+</body>
+</html>
