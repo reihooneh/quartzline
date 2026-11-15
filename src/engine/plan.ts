@@ -123,6 +123,7 @@ export interface PlanOptions {
   start?: Plan;
   maxEvaluations?: number;
   fire?: FireOptions;
+  onProgress?: (evaluations: number, chance: number) => void;
 }
 
 // Which choice was in charge when the worst moment happened. The pot lags behind the kiln, so
@@ -163,6 +164,7 @@ export function plan(shape: Shape, clay: Clay, kiln: Kiln, peak: number, opts: P
     const f = fire(shape, clay, kiln, b.schedule, { ...opts.fire, openAt: b.openAt });
     evaluations++;
     cache.set(key, f);
+    opts.onProgress?.(evaluations, f.chance);
     return f;
   };
   const ok = (f: Firing) => f.chance <= opts.limit;

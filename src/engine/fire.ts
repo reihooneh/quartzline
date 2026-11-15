@@ -48,9 +48,8 @@ export interface Worst {
 }
 
 export interface Frame {
-  outer: Float32Array; // °C per station
-  inner: Float32Array;
-  stress: Float32Array; // Pa, largest tension per station
+  temps: Float32Array;  // °C, station by station, layers from the outside face in (n × m)
+  stress: Float32Array; // Pa, the same cells (positive = tension)
 }
 
 export interface Firing {
@@ -65,6 +64,7 @@ export interface Firing {
   risk: number[];    // running crack chance so far
   peakStress: number[]; // Pa, the largest tension at each frame
   frames: Frame[];
+  layers: number;
   heatIn: number;    // J, through the faces
   stored: number;    // J, now held in the clay above where it started
   steps: number;
@@ -135,7 +135,7 @@ export function fire(shape: Shape, clay: Clay, kiln: Kiln, schedule: Segment[], 
   let worstH = -1;
   const out: Firing = {
     duration: 0, chance: 0, worst: null as unknown as Worst, times: [], air: [], shelf: [], coldest: [], hottest: [],
-    risk: [], peakStress: [], frames: [], heatIn: 0, stored: 0, steps: 0, finished: false,
+    risk: [], peakStress: [], frames: [], layers: m, heatIn: 0, stored: 0, steps: 0, finished: false,
   };
   const eps = clay.emissivity;
   const hRad = (ts: number, te: number) => {
@@ -187,13 +187,8 @@ export function fire(shape: Shape, clay: Clay, kiln: Kiln, schedule: Segment[], 
     out.risk.push(crackChance(Hmax));
     out.peakStress.push(peak);
     if (opts.record) {
-      const f: Frame = { outer: new Float32Array(n), inner: new Float32Array(n), stress: new Float32Array(n) };
-      for (let i = 0; i < n; i++) {
-        f.outer[i] = T[i * m];
-        f.inner[i] = T[i * m + m - 1];
-        f.stress[i] = stress.peak[i];
-      }
-      out.frames.push(f);
+      stress.evaluate(T); // the stress for exactly this moment
+      out.frames.push({ temps: Float32Array.from(T), stress: Float32Array.from(stress.sigma) });
     }
   };
 
