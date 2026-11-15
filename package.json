@@ -1,0 +1,24 @@
+{
+  "name": "quartzline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simulates the heat and stress inside a pot through a whole kiln firing, finds where and when it would crack, and plans the fastest kiln schedule that keeps it whole",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/build.mjs",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --test-concurrency=1 tests/engine/*.test.mjs",
+    "test:web": "node --test --test-concurrency=1 tests/web/*.test.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/fraunces": "5.3.0",
+    "@fontsource-variable/instrument-sans": "5.3.0",
+    "@types/node": "22.20.4",
+    "@types/three": "0.186.0",
+    "playwright": "1.63.0",
+    "three": "0.186.1",
+    "typescript": "5.9.3"
+  }
+}
