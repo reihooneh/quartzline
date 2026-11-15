@@ -25,6 +25,8 @@ export interface FireOptions {
   record?: boolean;   // keep per-station frames for drawing
   dtMax?: number;     // s, the largest time step (default 10)
   openAt?: number;    // °C: open the lid when the kiln has cooled to this (default: when cool)
+  startAt?: number;   // °C: start with the kiln and pot evenly at this (default: room)
+  stopAt?: number;    // °C: stop once the kiln air has cooled to this (default: run to the end)
   stressEvery?: number; // s between stress checks (default 30)
 }
 
@@ -107,7 +109,8 @@ export function fire(shape: Shape, clay: Clay, kiln: Kiln, schedule: Segment[], 
   // stable; 10 s keeps the crack chance within a few per cent of a much finer step.
   const dt = Math.max(1, Math.min(opts.dtMax ?? 10, 120));
 
-  const T = new Float64Array(n * m).fill(ROOM);
+  const start = Math.min(Math.max(opts.startAt ?? ROOM, ROOM), 1320);
+  const T = new Float64Array(n * m).fill(start);
   const Tn = new Float64Array(n * m);
   const L = Math.max(n, m);
   const a = new Float64Array(L), b = new Float64Array(L), c = new Float64Array(L), d = new Float64Array(L);
@@ -127,7 +130,9 @@ export function fire(shape: Shape, clay: Clay, kiln: Kiln, schedule: Segment[], 
   };
   const stress = new StressModel(shape, clay, m);
   const control = new Controller(kiln, schedule, opts.openAt ?? UNLOAD);
-  let shelf = ROOM;
+  control.air = start;
+  control.walls = start;
+  let shelf = start;
   let time = 0;
   let heatIn = 0, stored = 0, steps = 0;
   let Hmax = 0;
@@ -172,7 +177,7 @@ export function fire(shape: Shape, clay: Clay, kiln: Kiln, schedule: Segment[], 
   const shelfStep = 1 - Math.exp(-dt / kiln.shelfTau);
   let nextFrame = 0;
   let nextStress = 0;
-  let prevAir = ROOM;
+  let prevAir = start;
   let H = 0;
   const record = (air: number) => {
     let lo = Infinity, hi = -Infinity;
@@ -206,6 +211,7 @@ export function fire(shape: Shape, clay: Clay, kiln: Kiln, schedule: Segment[], 
       record(control.air);
       nextFrame += frameEvery;
     }
+    if (opts.stopAt !== undefined && control.air <= opts.stopAt && time > 0) break;
     if (control.done) {
       let hot = -Infinity;
       for (let q = 0; q < n * m; q++) if (T[q] > hot) hot = T[q];
